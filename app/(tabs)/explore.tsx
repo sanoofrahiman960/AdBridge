@@ -1,112 +1,181 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Button, Card, Input } from "@rneui/themed";
+import { router, type Href } from "expo-router";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { BrandHeader } from "@/components/app/brand-header";
+import { ProjectCard } from "@/components/app/dashboard/project-card";
+import { ScreenShell } from "@/components/app/screen-shell";
+import { SectionHeader } from "@/components/app/section-header";
+import { ThemedText } from "@/components/themed-text";
+import { AppRadius, AppSpacing } from "@/constants/theme";
+import { useTheme } from "@/contexts/theme-context";
 
-export default function TabTwoScreen() {
+const filters = ["Drafts", "Scheduled", "Completed"] as const;
+
+const campaignCards = [
+  {
+    ctaLabel: "Open brief",
+    meta: "Briefing · Needs targeting + creative",
+    progress: 0.3,
+    status: "Draft",
+    title: "Launch monsoon awareness",
+    value: "$6,500",
+  },
+  {
+    ctaLabel: "Review assets",
+    meta: "Media buying · Awaiting provider approvals",
+    progress: 0.58,
+    status: "Scheduled",
+    title: "Retail activation weekender",
+    value: "$8,000",
+  },
+  {
+    ctaLabel: "View wrap-up",
+    meta: "Performance · Final report ready",
+    progress: 1,
+    status: "Completed",
+    title: "Founders stories spotlight",
+    value: "$3,200",
+  },
+];
+
+export default function CampaignsScreen() {
+  const { palette } = useTheme();
+  const [activeFilter, setActiveFilter] =
+    useState<(typeof filters)[number]>("Drafts");
+  const createCampaignHref = "/create-campaign" as Href;
+
+  const visibleCards = campaignCards.filter((item) =>
+    activeFilter === "Drafts"
+      ? item.status === "Draft"
+      : activeFilter === "Scheduled"
+        ? item.status === "Scheduled"
+        : item.status === "Completed",
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <ScreenShell contentContainerStyle={styles.content}>
+      <BrandHeader
+        actionLabel="New"
+        compact
+        onActionPress={() => router.push(createCampaignHref)}
+      />
+
+      <Card
+        containerStyle={[
+          styles.heroCard,
+          { backgroundColor: palette.card, borderColor: palette.border },
+        ]}
+      >
+        <ThemedText style={styles.heroTitle} type="title">
+          Create new campaign
+        </ThemedText>
+        <ThemedText style={[styles.heroBody, { color: palette.mutedText }]}>
+          The campaign studio mirrors the Figma flow with a structured brief,
+          budget inputs, and clean actions for draft or launch states.
+        </ThemedText>
+        <Input
+          containerStyle={styles.searchContainer}
+          inputContainerStyle={[
+            styles.searchFrame,
+            {
+              backgroundColor: palette.background,
+              borderColor: palette.border,
+            },
+          ]}
+          inputStyle={{ color: palette.text, fontSize: 15 }}
+          leftIcon={{ color: palette.mutedText, name: "search" }}
+          placeholder="Search campaigns or briefs"
+          placeholderTextColor={palette.mutedText}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
+        <Button
+          onPress={() => router.push(createCampaignHref)}
+          title="Start New"
         />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
+      </Card>
+
+      <View
+        style={[styles.filterRow, { backgroundColor: palette.primaryMuted }]}
+      >
+        {filters.map((filter) => {
+          const selected = activeFilter === filter;
+
+          return (
+            <Button
+              buttonStyle={[
+                styles.filterButton,
+                selected && { backgroundColor: palette.primary },
+              ]}
+              key={filter}
+              onPress={() => setActiveFilter(filter)}
+              title={filter}
+              titleStyle={{
+                color: selected ? "#fff" : palette.text,
+                fontSize: 13,
+                fontWeight: "600",
+              }}
+              type={selected ? "solid" : "clear"}
+            />
+          );
         })}
-      </Collapsible>
-    </ParallaxScrollView>
+      </View>
+
+      <SectionHeader
+        subtitle={`Showing ${activeFilter.toLowerCase()} campaign items and next actions.`}
+        title="Campaign board"
+      />
+
+      <View style={styles.cardStack}>
+        {visibleCards.map((item) => (
+          <ProjectCard
+            key={item.title}
+            {...item}
+            onPress={() => router.push(createCampaignHref)}
+          />
+        ))}
+      </View>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  cardStack: {
+    gap: AppSpacing.md,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  content: {
+    gap: AppSpacing.xl,
+    paddingBottom: 32,
+  },
+  filterButton: {
+    borderRadius: AppRadius.pill,
+    flex: 1,
+    minHeight: 42,
+  },
+  filterRow: {
+    borderRadius: AppRadius.pill,
+    flexDirection: "row",
+    padding: 4,
+  },
+  heroBody: {
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  heroCard: {
+    gap: AppSpacing.md,
+  },
+  heroTitle: {
+    fontSize: 30,
+    lineHeight: 34,
+  },
+  searchContainer: {
+    paddingHorizontal: 0,
+  },
+  searchFrame: {
+    borderBottomWidth: 0,
+    borderRadius: AppRadius.md,
+    borderWidth: 1,
+    minHeight: 52,
+    paddingHorizontal: AppSpacing.sm,
   },
 });
