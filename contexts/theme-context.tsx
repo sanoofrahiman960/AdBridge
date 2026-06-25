@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useColorScheme as useSystemColorScheme } from 'react-native';
-import { Colors } from '@/constants/theme';
+import React, { createContext, useContext, useState } from "react";
+import { useColorScheme as useSystemColorScheme } from "react-native";
 
-type ColorScheme = 'light' | 'dark';
+import { Colors } from "@/constants/theme";
+
+type ColorScheme = "light" | "dark";
+type ThemePreference = ColorScheme | "system";
 
 interface ThemeContextType {
   colorScheme: ColorScheme;
@@ -15,22 +17,34 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemColorScheme = useSystemColorScheme();
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(
-    (systemColorScheme || 'light') as ColorScheme
-  );
+  const [preference, setPreference] = useState<ThemePreference>("system");
+
+  const colorScheme: ColorScheme =
+    preference === "system"
+      ? systemColorScheme === "dark"
+        ? "dark"
+        : "light"
+      : preference;
 
   const setColorScheme = (scheme: ColorScheme) => {
-    setColorSchemeState(scheme);
+    setPreference(scheme);
   };
 
   const toggleColorScheme = () => {
-    setColorSchemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setPreference((currentPreference) => {
+      const resolvedScheme =
+        currentPreference === "system" ? colorScheme : currentPreference;
+
+      return resolvedScheme === "light" ? "dark" : "light";
+    });
   };
 
   const palette = Colors[colorScheme];
 
   return (
-    <ThemeContext.Provider value={{ colorScheme, setColorScheme, toggleColorScheme, palette }}>
+    <ThemeContext.Provider
+      value={{ colorScheme, setColorScheme, toggleColorScheme, palette }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -38,8 +52,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 export function useTheme() {
   const context = useContext(ThemeContext);
+  const systemColorScheme = useSystemColorScheme();
+
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    const colorScheme: ColorScheme =
+      systemColorScheme === "dark" ? "dark" : "light";
+
+    return {
+      colorScheme,
+      palette: Colors[colorScheme],
+      setColorScheme: () => {
+        // No-op fallback for components rendered outside the provider tree.
+      },
+      toggleColorScheme: () => {
+        // No-op fallback for components rendered outside the provider tree.
+      },
+    };
   }
+
   return context;
 }

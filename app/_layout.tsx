@@ -4,14 +4,17 @@ import {
     ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 import { ThemeProvider as RNEThemeProvider, createTheme } from "@rneui/themed";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import "react-native-reanimated";
 
+import { RootStack } from "@/components/navigation/root-stack";
 import { Colors } from "@/constants/theme";
+import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { ThemeProvider, useTheme } from "@/contexts/theme-context";
-import Root from "./Root";
 
 function RootLayoutContent() {
   const { colorScheme, palette } = useTheme();
+  const { isReady } = useAuth();
   const navigationTheme = colorScheme === "dark" ? DarkTheme : DefaultTheme;
   const rneTheme = createTheme({
     mode: colorScheme === "dark" ? "dark" : "light",
@@ -59,7 +62,18 @@ function RootLayoutContent() {
   return (
     <NavigationThemeProvider value={navigationTheme}>
       <RNEThemeProvider theme={rneTheme}>
-        <Root />
+        {isReady ? (
+          <RootStack />
+        ) : (
+          <View
+            style={[
+              styles.bootScreen,
+              { backgroundColor: palette.background },
+            ]}
+          >
+            <ActivityIndicator color={palette.primary} size="large" />
+          </View>
+        )}
       </RNEThemeProvider>
     </NavigationThemeProvider>
   );
@@ -68,14 +82,17 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <RootLayoutContent />
+      <AuthProvider>
+        <RootLayoutContent />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
 
-//  <Stack>
-//         <Stack.Screen name="Root" options={{ headerShown: false }} />
-//         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-//         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-//       </Stack>
-//       <StatusBar style="auto" />
+const styles = StyleSheet.create({
+  bootScreen: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+  },
+});

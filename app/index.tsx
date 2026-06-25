@@ -1,5 +1,5 @@
 import { Button, Card, Icon } from "@rneui/themed";
-import { router, type Href } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -9,20 +9,26 @@ import { BackgroundAccents } from "@/components/app/background-accents";
 import { BrandHeader } from "@/components/app/brand-header";
 import { ScreenShell } from "@/components/app/screen-shell";
 import { ThemedText } from "@/components/themed-text";
+import { routePaths, routes } from "@/constants/routes";
+import { useAuth } from "@/contexts/auth-context";
 import { AppRadius, AppSpacing } from "@/constants/theme";
 import { useTheme } from "@/contexts/theme-context";
 
 export default function IndexScreen() {
   const { palette } = useTheme();
+  const { isAuthenticated } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserRole>("advertiser");
-  const dashboardHref = "/dashboard" as Href;
+
+  if (isAuthenticated) {
+    return <Redirect href={routes.dashboard} />;
+  }
 
   return (
     <ScreenShell contentContainerStyle={styles.content}>
       <BackgroundAccents />
       <BrandHeader
         actionLabel="Sign in"
-        onActionPress={() => router.push("/Login")}
+        onActionPress={() => router.push(routes.login)}
       />
 
       <View style={styles.heroCopy}>
@@ -124,14 +130,14 @@ export default function IndexScreen() {
         <Button
           onPress={() =>
             router.push({
-              pathname: "/Login",
+              pathname: routePaths.login,
               params: { role: selectedRole },
             })
           }
           title={`Continue as ${selectedRole === "advertiser" ? "Advertiser" : "Provider"}`}
         />
         <Button
-          onPress={() => router.push(dashboardHref)}
+          onPress={() => router.push(routes.campaigns)}
           title="Preview the app"
           titleStyle={{ color: palette.text }}
           type="outline"
@@ -145,7 +151,7 @@ export default function IndexScreen() {
         <ThemedText
           style={[styles.footerDivider, { color: palette.mutedText }]}
         >
-          •
+          /
         </ThemedText>
         <ThemedText style={[styles.footerText, { color: palette.mutedText }]}>
           Terms of Service
@@ -153,7 +159,7 @@ export default function IndexScreen() {
         <ThemedText
           style={[styles.footerDivider, { color: palette.mutedText }]}
         >
-          •
+          /
         </ThemedText>
         <ThemedText style={[styles.footerText, { color: palette.mutedText }]}>
           Support

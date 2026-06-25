@@ -6,6 +6,7 @@ import { AppSpacing } from "@/constants/theme";
 import { useTheme } from "@/contexts/theme-context";
 
 type ProjectCardProps = {
+  buttonDisabled?: boolean;
   ctaLabel: string;
   meta: string;
   onPress?: () => void;
@@ -16,6 +17,7 @@ type ProjectCardProps = {
 };
 
 export function ProjectCard({
+  buttonDisabled = false,
   ctaLabel,
   meta,
   onPress,
@@ -69,7 +71,12 @@ export function ProjectCard({
         </View>
       ) : null}
 
-      <Button buttonStyle={styles.button} onPress={onPress} title={ctaLabel} />
+      <Button
+        buttonStyle={styles.button}
+        disabled={buttonDisabled || !onPress}
+        onPress={onPress}
+        title={ctaLabel}
+      />
     </Card>
   );
 }

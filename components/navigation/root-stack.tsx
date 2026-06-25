@@ -1,12 +1,11 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
 import { Platform } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { useTheme } from "@/contexts/theme-context";
 
-export default function Root() {
+export function RootStack() {
   const { colorScheme } = useTheme();
 
   return (
@@ -30,7 +29,14 @@ export default function Root() {
           }}
         />
         <Stack.Screen
-          name="Login"
+          name="login"
+          options={{
+            presentation: "card",
+            gestureEnabled: Platform.OS === "ios",
+          }}
+        />
+        <Stack.Screen
+          name="register"
           options={{
             presentation: "card",
             gestureEnabled: Platform.OS === "ios",

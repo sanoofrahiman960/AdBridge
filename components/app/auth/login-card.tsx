@@ -1,30 +1,47 @@
 import { Button, Card, Divider, Icon, Input } from "@rneui/themed";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { demoCredentialsByRole, getRoleLabel } from "@/constants/auth";
 import { AppRadius, AppSpacing } from "@/constants/theme";
+import type { AppUserRole } from "@/types/api";
 import { useTheme } from "@/contexts/theme-context";
 import { SocialAuthButtons } from "./social-auth-buttons";
 
-export type UserRole = "advertiser" | "provider";
+export type UserRole = AppUserRole;
+
+export type LoginCardSubmitValues = {
+  email: string;
+  password: string;
+  role: UserRole;
+};
 
 type LoginCardProps = {
+  errorMessage?: string | null;
   initialRole?: UserRole;
-  onSubmit: (role: UserRole) => void;
+  onCreateAccountPress?: (role: UserRole) => void;
+  onSubmit: (values: LoginCardSubmitValues) => void;
+  submitting?: boolean;
 };
 
 export function LoginCard({
+  errorMessage,
   initialRole = "advertiser",
+  onCreateAccountPress,
   onSubmit,
+  submitting = false,
 }: LoginCardProps) {
   const { palette } = useTheme();
   const [role, setRole] = useState<UserRole>(initialRole);
-  const [email, setEmail] = useState("alex@adbridge.co");
-  const [password, setPassword] = useState("password");
+  const [email, setEmail] = useState(demoCredentialsByRole[initialRole].email);
+  const [password, setPassword] = useState(
+    demoCredentialsByRole[initialRole].password,
+  );
 
-  const ctaTitle = useMemo(() => {
-    return role === "advertiser" ? "Login as Advertiser" : "Login as Provider";
+  useEffect(() => {
+    setEmail(demoCredentialsByRole[role].email);
+    setPassword(demoCredentialsByRole[role].password);
   }, [role]);
 
   return (
@@ -115,17 +132,30 @@ export function LoginCard({
       <View style={styles.ctaStack}>
         <Button
           buttonStyle={styles.primaryCta}
-          onPress={() => onSubmit(role)}
-          title={ctaTitle}
+          loading={submitting}
+          onPress={() => onSubmit({ email, password, role })}
+          title={`Login as ${getRoleLabel(role)}`}
         />
         <Button
           buttonStyle={[styles.secondaryCta, { borderColor: palette.border }]}
-          onPress={() => onSubmit(role)}
-          title="Preview dashboard"
+          onPress={() => {
+            setEmail(demoCredentialsByRole[role].email);
+            setPassword(demoCredentialsByRole[role].password);
+          }}
+          title="Reset demo login"
           titleStyle={{ color: palette.text }}
           type="outline"
         />
       </View>
+
+      <ThemedText style={[styles.demoHint, { color: palette.mutedText }]}>
+        Demo credentials are loaded for the selected role. Switch roles to swap
+        between the advertiser and provider accounts.
+      </ThemedText>
+
+      {errorMessage ? (
+        <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
+      ) : null}
 
       <View style={styles.dividerRow}>
         <Divider style={styles.divider} width={1} />
@@ -141,9 +171,14 @@ export function LoginCard({
         <ThemedText style={[styles.footerText, { color: palette.mutedText }]}>
           New to AdBridge?
         </ThemedText>
-        <ThemedText style={[styles.footerLink, { color: palette.primary }]}>
-          Create an account
-        </ThemedText>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => onCreateAccountPress?.(role)}
+        >
+          <ThemedText style={[styles.footerLink, { color: palette.primary }]}>
+            Create an account
+          </ThemedText>
+        </Pressable>
       </View>
     </Card>
   );
@@ -164,6 +199,10 @@ const styles = StyleSheet.create({
   ctaStack: {
     gap: AppSpacing.sm,
   },
+  demoHint: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
   divider: {
     flex: 1,
   },
@@ -180,6 +219,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
     justifyContent: "center",
+  },
+  errorText: {
+    color: "#c74545",
+    fontSize: 13,
+    lineHeight: 18,
   },
   footerLink: {
     fontSize: 13,
