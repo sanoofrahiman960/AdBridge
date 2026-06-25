@@ -1,0 +1,24 @@
+{
+  "name": "adbridge-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node.js backend API for the AdBridge Expo app",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "reset-db": "node scripts/reset-db.js",
+    "test": "node --test --test-concurrency=1"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
+  }
+}
